@@ -15,7 +15,7 @@ void main() async {
         ChangeNotifierProvider(create: (context) => Auth()),
         ChangeNotifierProvider(create: (context) => Horarios())
       ],
-      child:MyApp()
+      child: MyApp()
     )
   );
 }
