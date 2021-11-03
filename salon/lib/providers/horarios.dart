@@ -1,13 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+
 import 'package:salon/database/db_firestore.dart';
 import 'package:salon/models/horario_model.dart';
 import 'package:salon/models/type_model.dart';
 
 class Horarios with ChangeNotifier {
+  String _token;
+
   List<HorarioModel> _horarios = [];
   List<HorarioModel> _historico = [];
+  
+  Horarios(this._token, this._historico, this._horarios);
 
   List<HorarioModel> historico(String id) {
     return [..._historico].where((element) => element.userId == id).toList();
@@ -15,6 +20,10 @@ class Horarios with ChangeNotifier {
 
   List<HorarioModel> get horarios {
     return [..._horarios];
+  }
+
+  List<HorarioModel> get historicoGet {
+    return [..._historico];
   }
 
   Future<void> loadHorarios() async {
@@ -26,7 +35,6 @@ class Horarios with ChangeNotifier {
     
     var collection = db.collection('horarios');
     var snapshot = await collection.get();
-
 
     snapshot.docs.forEach((element) {
       final h = HorarioModel(

@@ -1,4 +1,5 @@
 
+import 'dart:async';
 import 'dart:convert';
 import 'dart:io';
 
@@ -8,6 +9,7 @@ import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 import 'package:salon/_utils/urls.dart';
 import 'package:salon/database/db_firestore.dart';
+import 'package:salon/database/store.dart';
 import 'package:salon/exceptions/auth_exception.dart';
 import 'package:salon/models/user_model.dart';
 
@@ -19,6 +21,7 @@ class Auth with ChangeNotifier {
   String? _email;
   String? _userId;
   DateTime? _expiryDate;
+  Timer? _logoutTimer;
 
   UserModel? _user;
 
@@ -97,7 +100,17 @@ class Auth with ChangeNotifier {
         id: body['localId']
       );
 
+      Store.saveMap('userData',{
+        'name' : _user!.name,
+        'email' : _user!.email,
+        'phone' : _user!.phone,
+        'image' : _user!.image,
+        'id' : _user!.id,
+        'token' : _token,
+        'expiry' : _expiryDate!.toIso8601String(),
+      });
 
+      _autoLogout();
       notifyListeners();
     }
   }
@@ -139,6 +152,17 @@ class Auth with ChangeNotifier {
         id: body['localId']
       );
 
+      Store.saveMap('userData',{
+        'name' : _user!.name,
+        'email' : _user!.email,
+        'phone' : _user!.phone,
+        'image' : _user!.image,
+        'id' : _user!.id,
+        'token' : _token,
+        'expiry' : _expiryDate!.toIso8601String(),
+      });
+
+      _autoLogout();
       notifyListeners();
     }
   }
@@ -156,12 +180,52 @@ class Auth with ChangeNotifier {
     notifyListeners();
   }
 
+  Future<void> tryAutoLogin() async {
+    if (isAuth) return;
+
+    final userData = await Store.getMap('userData');
+    if (userData.isEmpty) return;
+
+    final expiryDate = DateTime.parse(userData['expiry']);
+    if (expiryDate.isBefore(DateTime.now())) return;
+
+    _token = userData['token'];
+    _email = userData['email'];
+    _userId = userData['userId'];
+    _expiryDate = expiryDate;
+
+    _user = UserModel(
+        name: userData['name'],
+        email: userData['email'], 
+        phone: userData['phone'], 
+        image: userData['image'],
+        id: userData['id']
+      );
+
+    _autoLogout();
+    notifyListeners();
+
+  }
+
   void logout() {
     _token = null;
     _email = null;
     _userId = null;
     _expiryDate = null;
-      notifyListeners();
+
+    _logoutTimer?.cancel();
+    _logoutTimer = null;
+
+    Store.remove('userData').then((value) =>notifyListeners());
+  }
+
+  void _autoLogout() {
+    _logoutTimer?.cancel();
+    _logoutTimer = null;
+
+    final time = _expiryDate?.difference(DateTime.now()).inSeconds;
+
+    _logoutTimer = Timer(Duration(seconds: time ?? 0), logout);
   }
 
 }

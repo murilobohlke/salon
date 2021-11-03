@@ -13,7 +13,14 @@ void main() async {
     MultiProvider(
       providers: [
         ChangeNotifierProvider(create: (context) => Auth()),
-        ChangeNotifierProvider(create: (context) => Horarios())
+        ChangeNotifierProxyProvider<Auth, Horarios>(
+          create: (context) => Horarios('',[],[]),
+          update: (context, auth, previous) => Horarios(
+            auth.token ?? '',
+            previous?.horarios ?? [],
+            previous?.historicoGet ?? [],
+          )
+        )
       ],
       child: MyApp()
     )
