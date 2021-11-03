@@ -1,6 +1,7 @@
 # Salon
 
 # Sobre o Projeto
+Salon é um aplicativo usado como agenda virtual de horários em um salão de beleza, onde os próprios clientes podem marcar um horário. Além disso os clientes podem também verificar os valores dos procedimentos e seu histórico. É um aplicativo simples mas extremamente útil, onde a praticidade é o que mais importa.
 
 # Layout
 
@@ -8,6 +9,7 @@
 
 
 # Objetivo
+O objetivo deste projeto foi aprender melhor como utilizar o Firebase, desde a parte de autenticação até a parte de salvar imagens e outras informações. Também o conceito de se ter algo sempre sincronizado foi explorado.
 
 # Como Utilizar?
 
@@ -25,13 +27,15 @@ $ flutter pub get
 $ flutter run
 ~~~
 
+*Necessário também ter um projeto no Firebase, configurar ele para a plataforma e ter a chave de API.
+
 # Tecnologias Utilizadas
 - Flutter
 - Provider
 - Image Picker
-- Firestore
-- Storage
-- Authentication
+- Firebase Firestore
+- Firebase Storage
+- Firebase Authentication
 
 # Autor
 Murilo Steinmetz Böhlke
