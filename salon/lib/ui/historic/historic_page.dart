@@ -30,11 +30,11 @@ class _HistoricPageState extends State<HistoricPage> {
   @override
   Widget build(BuildContext context) {
     String id = Provider.of<Auth>(context, listen: false).user!.id;
-    final h = Provider.of<Horarios>(context).historico(id);
+    final h = Provider.of<Horarios>(context,).historicoId(id);
 
     return Container(
       width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: 30, horizontal: 40),
+      margin: EdgeInsets.only(top: 30, left: 20, right: 20, bottom: 5),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [

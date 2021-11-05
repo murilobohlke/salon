@@ -18,7 +18,7 @@ void main() async {
           update: (context, auth, previous) => Horarios(
             auth.token ?? '',
             previous?.horarios ?? [],
-            previous?.historicoGet ?? [],
+            previous?.historico ?? [],
           )
         )
       ],

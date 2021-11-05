@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:salon/_utils/app_config.dart';
 import 'package:salon/models/horario_model.dart';
 
 class HistoricTile extends StatelessWidget {
@@ -13,7 +12,7 @@ class HistoricTile extends StatelessWidget {
       margin: EdgeInsets.symmetric(vertical: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50),),
       elevation: 5,
-      color: markSecondaryColor,
+      color: h.background,
       child: ListTile(
         trailing: Text('${h.end.day}/${h.end.month}/${h.end.year}', style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),),
         title: Text(h.name, textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.bold),),

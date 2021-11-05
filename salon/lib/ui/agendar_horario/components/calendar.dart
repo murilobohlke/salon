@@ -25,22 +25,35 @@ class _CalendarState extends State<Calendar> {
   TextEditingController _nameControler = TextEditingController();
 
   String userId='';
+  String error='';
 
   bool isLoading = false;
   bool isSaving = false;
   int index = -1;
 
+  DateTime minDate = DateTime(
+    DateTime.now().year,
+    DateTime.now().month,
+    DateTime.now().day,
+    DateTime.now().minute < 30 ? DateTime.now().hour : DateTime.now().hour + 1,
+    DateTime.now().minute < 30 ? 30 : 0,
+  );
+
   _showModal(CalendarTapDetails details) {
+    print(details.date);
+    print(minDate);
+    //&& details.date.isAfter(minDate)
     if(details.appointments == null) {
       showModalBottomSheet(
         isScrollControlled: true,
         context: context, 
         builder: (context) {
+          error = '';
           return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Container(
               padding: MediaQuery.of(context).viewInsets,
-              margin: EdgeInsets.symmetric(horizontal: 30, vertical: 40),
+              margin: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -70,13 +83,20 @@ class _CalendarState extends State<Calendar> {
                   else
                   Row(
                     children: [
-                      Expanded(child: PrimaryButton('SALVAR', () async {
-                         setState(() => isSaving = true);
-                        await _onSave(details);
-                         setState(() => isSaving = false);
-                      })),
+                      Expanded(
+                        child: PrimaryButton(
+                          'SALVAR', 
+                          () async {
+                            setState(() => isSaving = true);
+                            await _onSave(details);
+                            setState(() => isSaving = false);
+                          }
+                        )
+                      ),
                     ],
                   ),
+                  SizedBox(height: 15,),
+                  Text(error, style: TextStyle(fontSize: 18, color: Colors.red[700], fontWeight: FontWeight.bold),)
                 ],
               ),
             );
@@ -173,8 +193,14 @@ class _CalendarState extends State<Calendar> {
 
   Future<void> _onSave(CalendarTapDetails details) async {
 
+    if(index == -1){
+      setState(() => error = 'Por favor, selecione o tipo');
+      return;
+    }
+    
     final user = Provider.of<Auth>(context, listen: false).user;
     var time = DateTime(2021, details.date!.month, details.date!.day, details.date!.hour, details.date!.minute , 0 );
+    
     HorarioModel h = HorarioModel(
       id: '',
       name: _nameControler.text, 
@@ -186,7 +212,7 @@ class _CalendarState extends State<Calendar> {
     );
 
     await Provider.of<Horarios>(context, listen: false).addHorario(h);
-    
+  
     index = -1;
 
     Navigator.pop(context);
@@ -214,13 +240,7 @@ class _CalendarState extends State<Calendar> {
     return isLoading
     ? Center(child: CircularProgressIndicator(color: markPrimaryColor,),)
     : SfCalendar(
-      minDate: DateTime(
-        DateTime.now().year,
-        DateTime.now().month,
-        DateTime.now().day,
-        DateTime.now().minute < 30 ? DateTime.now().hour : DateTime.now().hour + 1,
-        DateTime.now().minute < 30 ? 30 : 0,
-      ),
+      minDate: minDate,
       onTap: _showModal,
       firstDayOfWeek: 1,
       appointmentBuilder: (context, details) {

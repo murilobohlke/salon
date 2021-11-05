@@ -84,6 +84,8 @@ class _EditPerfilPageState extends State<EditPerfilPage> {
               SizedBox(height: 60,),
               Row(
                 children: [
+                  Expanded(child: PrimaryButton('CANCELAR',() => Navigator.pop(context))),
+                  SizedBox(width: 20,),
                   Expanded(child: PrimaryButton('SALVAR', _editPerfil)),
                 ],
               )

@@ -16,10 +16,9 @@ import 'package:salon/models/user_model.dart';
 
 class Auth with ChangeNotifier {
   late FirebaseFirestore db;
+  late FirebaseStorage storage;
   
   String? _token;
-  String? _email;
-  String? _userId;
   DateTime? _expiryDate;
   Timer? _logoutTimer;
 
@@ -35,11 +34,11 @@ class Auth with ChangeNotifier {
   }
 
   String? get email {
-    return isAuth ? _email : null;
+    return isAuth ? _user!.email : null;
   }
 
   String? get userId {
-    return isAuth ? _userId : null;
+    return isAuth ? _user!.id : null;
   }
   
   UserModel? get user {
@@ -48,6 +47,7 @@ class Auth with ChangeNotifier {
 
   Future<void> signUp(String email, String password, String name, String phone, String imagePath) async {
     final _url = SINGUP_URL;
+    
     final response = await http.post(
       Uri.parse(_url),
       body: jsonEncode({
@@ -56,28 +56,29 @@ class Auth with ChangeNotifier {
         'returnSecureToken': true
       })
     );
+
     Map<String, dynamic> body = jsonDecode(response.body);
+    
     if(body['error'] != null){
       throw AuthException(body['error']['message']);
     } else {
+      final userId = body['localId'];
       _token = body['idToken'];
-      _email = body['email'];
-      _userId = body['localId'];
 
       _expiryDate = DateTime.now().add(
-        Duration(
-          seconds: int.parse(body['expiresIn']),
-        ),
+        Duration(seconds: int.parse(body['expiresIn'])),
       );
 
-      final FirebaseStorage storage = FirebaseStorage.instance;
+      storage = FirebaseStorage.instance;
+      
       File file = File(imagePath);
-      String imgUrl1 = '';
+      String imgUrl = '';
+      
       try {
-        String ref = 'images/$_userId.jpg';
-        UploadTask task1 = storage.ref(ref).putFile(file);
+        String ref = 'images/$userId.jpg';
+        UploadTask task = storage.ref(ref).putFile(file);
 
-      imgUrl1 = await (await task1).ref.getDownloadURL();
+        imgUrl = await (await task).ref.getDownloadURL();
 
       } on FirebaseException catch (e) {
         print(e);
@@ -85,18 +86,18 @@ class Auth with ChangeNotifier {
 
       db = DBFirestore.get();
 
-      await db.collection('users').doc(_userId).set({
+      await db.collection('users').doc(userId).set({
         'name': name,
         'phone': phone,
         'email': email,
-        'image': imgUrl1
+        'image': imgUrl
       });
 
       _user = UserModel(
         name: name, 
         email: email, 
         phone: phone, 
-        image: imgUrl1,
+        image: imgUrl,
         id: body['localId']
       );
 
@@ -125,13 +126,15 @@ class Auth with ChangeNotifier {
         'returnSecureToken': true
       })
     );
+
     Map<String, dynamic> body = jsonDecode(response.body);
+    
     if(body['error'] != null){
       throw AuthException(body['error']['message']);
     } else {
       _token = body['idToken'];
-      _email = body['email'];
-      _userId = body['localId'];
+      
+      final userId = body['localId'];
 
       _expiryDate = DateTime.now().add(
         Duration(
@@ -141,7 +144,7 @@ class Auth with ChangeNotifier {
 
       db = DBFirestore.get();
 
-      final response = await db.collection('users').doc(_userId).get();
+      final response = await db.collection('users').doc(userId).get();
       Map<String, dynamic> data = response.data() as Map<String, dynamic>;
       
       _user = UserModel(
@@ -190,42 +193,39 @@ class Auth with ChangeNotifier {
     if (expiryDate.isBefore(DateTime.now())) return;
 
     _token = userData['token'];
-    _email = userData['email'];
-    _userId = userData['userId'];
     _expiryDate = expiryDate;
 
     _user = UserModel(
-        name: userData['name'],
-        email: userData['email'], 
-        phone: userData['phone'], 
-        image: userData['image'],
-        id: userData['id']
-      );
+      name: userData['name'],
+      email: userData['email'], 
+      phone: userData['phone'], 
+      image: userData['image'],
+      id: userData['id']
+    );
 
     _autoLogout();
     notifyListeners();
-
   }
 
   void logout() {
     _token = null;
-    _email = null;
-    _userId = null;
     _expiryDate = null;
+
+    _user = null;
 
     _logoutTimer?.cancel();
     _logoutTimer = null;
 
-    Store.remove('userData').then((value) =>notifyListeners());
+    Store.remove('userData').then((value) => notifyListeners());
   }
 
   void _autoLogout() {
     _logoutTimer?.cancel();
     _logoutTimer = null;
 
-    final time = _expiryDate?.difference(DateTime.now()).inSeconds;
+    final secondsLogout = _expiryDate?.difference(DateTime.now()).inSeconds;
 
-    _logoutTimer = Timer(Duration(seconds: time ?? 0), logout);
+    _logoutTimer = Timer(Duration(seconds: secondsLogout ?? 0), logout);
   }
 
 }

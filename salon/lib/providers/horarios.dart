@@ -7,6 +7,8 @@ import 'package:salon/models/horario_model.dart';
 import 'package:salon/models/type_model.dart';
 
 class Horarios with ChangeNotifier {
+  late FirebaseFirestore db;
+
   String _token;
 
   List<HorarioModel> _horarios = [];
@@ -14,7 +16,7 @@ class Horarios with ChangeNotifier {
   
   Horarios(this._token, this._historico, this._horarios);
 
-  List<HorarioModel> historico(String id) {
+  List<HorarioModel> historicoId(String id) {
     return [..._historico].where((element) => element.userId == id).toList();
   }
 
@@ -22,19 +24,19 @@ class Horarios with ChangeNotifier {
     return [..._horarios];
   }
 
-  List<HorarioModel> get historicoGet {
+  List<HorarioModel> get historico {
     return [..._historico];
   }
 
   Future<void> loadHorarios() async {
-    final db = DBFirestore.get();
+    db = DBFirestore.get();
+
     _horarios = [];
     _historico = [];
 
     List<HorarioModel> aux = [];
     
-    var collection = db.collection('horarios');
-    var snapshot = await collection.get();
+    var snapshot = await db.collection('horarios').get();
 
     snapshot.docs.forEach((element) {
       final h = HorarioModel(
@@ -44,8 +46,10 @@ class Horarios with ChangeNotifier {
         end:(element['end'] as Timestamp).toDate(),  
         background: Color(int.parse(element['color'])),
         type: element['type'], 
-        userId: element['userId']);
-        aux.add(h);
+        userId: element['userId']
+      );
+
+      aux.add(h);
     });
 
     aux.forEach((element) { 
@@ -55,33 +59,33 @@ class Horarios with ChangeNotifier {
         _horarios.add(element);
       }
     });
-    print(_historico);
-    notifyListeners();
 
+    _historico.sort((a,b) => a.start.compareTo(b.start));
+
+    _historico = _historico.reversed.toList();
+
+    notifyListeners();
   }
 
   Future<void> addHorario (HorarioModel h) async {
     _horarios.add(h);
 
-    final db = DBFirestore.get();
+    db = DBFirestore.get();
 
     await db.collection('horarios').add({
-        'name': h.name,
-        'start': h.start,
-        'end': h.end,
-        'type': h.type,
-        'userId': h.userId,
-        'color': '0xff${h.background.value.toRadixString(16).substring(2, 8)}',
-      });
+      'name': h.name,
+      'start': h.start,
+      'end': h.end,
+      'type': h.type,
+      'userId': h.userId,
+      'color': '0xff${h.background.value.toRadixString(16).substring(2, 8)}',
+    });
 
     await loadHorarios();
   }
 
   Future<void> editHorario(String id, String name, TypeModel type) async{
-    print(id);
-    print(name);
-    print(type);
-     final db = DBFirestore.get();
+    db = DBFirestore.get();
 
     await db.collection('horarios').doc(id).update({
       'name': name,
@@ -94,7 +98,7 @@ class Horarios with ChangeNotifier {
 
    Future<void> deleteHorario(String id) async{
 
-    final db = DBFirestore.get();
+    db = DBFirestore.get();
 
     await db.collection('horarios').doc(id).delete();
 
