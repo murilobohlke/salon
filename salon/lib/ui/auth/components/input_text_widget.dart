@@ -30,6 +30,7 @@ class InputTextWidget extends StatelessWidget {
       controller: controller,
       keyboardType: keyboarType,
       focusNode: focus,
+      textInputAction: TextInputAction.next,
       decoration: InputDecoration(
         contentPadding: EdgeInsets.zero,
         labelText: label,

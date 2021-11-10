@@ -38,7 +38,7 @@ dependencies:
   syncfusion_localizations: ^19.3.46
   flutter_masked_text2: ^0.9.1
   shared_preferences: ^2.0.6
-  top_snackbar_flutter: ^1.0.1
+  animated_card: ^2.0.0
 
   # The following adds the Cupertino Icons font to your application.
   # Use with the CupertinoIcons class for iOS style icons.

@@ -1,3 +1,4 @@
+import 'package:animated_card/animated_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:salon/_utils/app_config.dart';
@@ -49,7 +50,7 @@ class _HistoricPageState extends State<HistoricPage> {
                 : ListView.builder(
                   shrinkWrap: true,
                   itemCount: h.length,
-                  itemBuilder: (context, index) => HistoricTile(h[index])
+                  itemBuilder: (context, index) => AnimatedCard(child: HistoricTile(h[index]))
                 ),
               ),
             )

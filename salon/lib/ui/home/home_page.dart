@@ -1,3 +1,4 @@
+import 'package:animated_card/animated_card.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
@@ -24,37 +25,40 @@ class HomePage extends StatelessWidget {
     final user = Provider.of<Auth>(context).user;
     return Scaffold(
       appBar: AppBar(),
-      body: Container(
-        margin: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
-        child: Column(
-          children: [
-            Text(
-              'Salon', 
-              textAlign: TextAlign.center, 
-              style: GoogleFonts.dancingScript(
-                fontSize: 60, 
-                color: Colors.red[700], 
-                fontWeight: FontWeight.bold
+      body: AnimatedCard(
+        direction: AnimatedCardDirection.bottom,
+        child: Container(
+          margin: EdgeInsets.symmetric(vertical: 30, horizontal: 20),
+          child: Column(
+            children: [
+              Text(
+                'Salon', 
+                textAlign: TextAlign.center, 
+                style: GoogleFonts.dancingScript(
+                  fontSize: 60, 
+                  color: Colors.red[700], 
+                  fontWeight: FontWeight.bold
+                ),
               ),
-            ),
-            Text(
-              getSaudacaoText(nome: user?.name ?? '' ),
-              style: TextStyle(fontSize: 18, color: markPrimaryColor, fontWeight: FontWeight.bold),
-            ),
-            Spacer(),
-            CardButton(
-              'AGENDAR HORÁRIO', 
-              Icons.calendar_today,
-              () => Navigator.pushNamed(context, AppRoutes.AGENDAR_HORARIO)
-            ),
-            SizedBox(height: 30,),
-            CardButton(
-              'CONSULTAR VALORES', 
-              Icons.attach_money,
-              () => Navigator.pushNamed(context, AppRoutes.VALORES)
-            ),
-            Spacer()
-          ],
+              Text(
+                getSaudacaoText(nome: user?.name ?? '' ),
+                style: TextStyle(fontSize: 18, color: markPrimaryColor, fontWeight: FontWeight.bold),
+              ),
+              Spacer(),
+              CardButton(
+                'AGENDAR HORÁRIO', 
+                Icons.calendar_today,
+                () => Navigator.pushNamed(context, AppRoutes.AGENDAR_HORARIO)
+              ),
+              SizedBox(height: 30,),
+              CardButton(
+                'CONSULTAR VALORES', 
+                Icons.attach_money,
+                () => Navigator.pushNamed(context, AppRoutes.VALORES)
+              ),
+              Spacer()
+            ],
+          ),
         ),
       )
     );

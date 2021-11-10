@@ -2,14 +2,13 @@ import 'dart:io';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
-import 'package:google_fonts/google_fonts.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:provider/provider.dart';
 import 'package:salon/_utils/app_config.dart';
 import 'package:salon/exceptions/auth_exception.dart';
 import 'package:salon/providers/auth.dart';
-import 'package:salon/ui/_common/primary_button.dart';
-import 'package:salon/ui/auth/components/input_text_widget.dart';
+import 'package:salon/ui/auth/components/form_login.dart';
+import 'package:salon/ui/auth/components/form_new_user.dart';
 
 class AuthPage extends StatefulWidget {
   const AuthPage({ Key? key }) : super(key: key);
@@ -24,8 +23,6 @@ class _AuthPageState extends State<AuthPage> {
   final FocusNode _confirmPasswordFocus = new FocusNode();
   final FocusNode _nameFocus = new FocusNode();
   final FocusNode _phoneFocus = new FocusNode();
-
-  final _formKey = GlobalKey<FormState>();
 
   TextEditingController _passwordController = TextEditingController();
   TextEditingController _confirmPasswordController = TextEditingController();
@@ -139,10 +136,11 @@ class _AuthPageState extends State<AuthPage> {
       backgroundColor: markSecondaryColor,
       body: SafeArea(
         child: Center(
-          child: Container(
+          child: AnimatedContainer(
+            duration: Duration(milliseconds: 500),
             margin: EdgeInsets.symmetric(horizontal: 40, vertical: 20),
             padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
-            height: isLogin ? 315 : 630,
+            height: isLogin ? 330 : 640,
             width: double.infinity,
             decoration: BoxDecoration(
               color: Colors.white,
@@ -150,110 +148,30 @@ class _AuthPageState extends State<AuthPage> {
             ),
             child: isLoading 
             ? Center(child: CircularProgressIndicator(color: markPrimaryColor,),)
-            : SingleChildScrollView(
-                child: Form(
-                key: _formKey,
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.stretch,
-                  children: [
-                    Text('Salon', textAlign: TextAlign.center, style: GoogleFonts.dancingScript(fontSize: 35, color: Colors.red[700], fontWeight: FontWeight.w800),),
-                    if(!isLogin)
-                    SizedBox(height: 20,),
-                    if(!isLogin)
-                    Stack(
-                      children: [
-                        Center(
-                          child: Container(
-                            alignment: Alignment.center,
-                             decoration: BoxDecoration(
-                               color: markSecondaryColor,
-                              borderRadius: BorderRadius.all(Radius.circular(60))
-                            ),
-                            height: 120,
-                            width: 120,
-                            child: _storedImage == null 
-                            ? Text('Adicionar Foto', style: TextStyle(color: Colors.black),)
-                            : ClipRRect(
-                              borderRadius:BorderRadius.all(Radius.circular(120)) ,
-                              child: Image.file(File(_storedImage!.path), height: 120, width: 120, fit: BoxFit.cover,)),
-                          ),
-                        ),
-                        Positioned(
-                          bottom: 0,
-                          right:100,
-                          child: IconButton(onPressed: _image, icon: Icon(Icons.camera_alt, color: Colors.white))
-                        )
-                      ],
-                    ),
-                    SizedBox(height: 20,),
-                    if(!isLogin)
-                    InputTextWidget(
-                      key: ValueKey('name'),
-                      controller: _nameController,
-                      label: 'Nome', 
-                      icon: Icons.person,
-                      keyboarType: TextInputType.name, 
-                      focus: _nameFocus,
-                    ),
-                    if(!isLogin)
-                    SizedBox(height: 10,),
-                    if(!isLogin)
-                    InputTextWidget(
-                      key: ValueKey('phone'),
-                      controller: _phoneController,
-                      label: 'Telefone', 
-                      icon: Icons.phone,
-                      keyboarType: TextInputType.phone, 
-                      focus: _phoneFocus,
-                    ),
-                    if(!isLogin)
-                    SizedBox(height: 10,),
-                    InputTextWidget(
-                      color: markPrimaryColor,
-                      key: ValueKey('email'),
-                      controller: _emailController,
-                      label: 'Email', 
-                      icon: Icons.mail, 
-                      focus: _emailFocus, 
-                      keyboarType: TextInputType.emailAddress,
-                    ),
-                    SizedBox(height: 10,),
-                    InputTextWidget(
-                      color: markPrimaryColor,
-                      key: ValueKey('password'),
-                      controller: _passwordController,
-                      obscureText: true,
-                      label: 'Senha', 
-                      icon: Icons.lock,
-                      keyboarType: TextInputType.number,
-                      focus: _passwordFocus,
-                    ),
-                    if(!isLogin)
-                    SizedBox(height: 10,),
-                    if(!isLogin)
-                    InputTextWidget(
-                      controller: _confirmPasswordController,
-                      key: ValueKey('confirmPassword'),
-                      obscureText: true,
-                      label: 'Confirmar Senha', 
-                      icon: Icons.lock,
-                      keyboarType: TextInputType.number, 
-                      focus: _confirmPasswordFocus,
-                    ),
-                    SizedBox(height: 30,),
-                    PrimaryButton(isLogin ? 'LOGIN' : 'CRIAR', (){
-                      if (_formKey.currentState!.validate()) {
-                        isLogin ? _login() : _signUp();    
-                      }
-                    }),
-                    TextButton(
-                      onPressed: _changeMode, 
-                      child: Text(isLogin ? 'Criar nova conta?' : 'Já tenho conta!', style: TextStyle(color: markTertiaryColor, fontSize: 15, fontWeight: FontWeight.bold),)
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            : isLogin
+            ? FormLogin(
+              emailController: _emailController, 
+              emailFocus: _emailFocus, 
+              passwordController: _passwordController, 
+              passwordFocus: _passwordFocus, 
+              login: _login, 
+              changeMode: _changeMode)
+            : FormNewUser(
+              pathImage: _storedImage?.path ?? null,
+              image: _image,
+              changeMode: _changeMode,
+              signUp: _signUp,
+              emailController: _emailController, 
+              emailFocus: _emailFocus, 
+              passwordController: _passwordController, 
+              passwordFocus: _passwordFocus,
+              nameController: _nameController,
+              nameFocus: _nameFocus,
+              confirmPasswordController: _confirmPasswordController,
+              confirmPasswordFocus: _confirmPasswordFocus,
+              phoneController: _phoneController,
+              phoneFocus:_phoneFocus,
+            )
           ),
         ),
       ),

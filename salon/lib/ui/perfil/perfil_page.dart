@@ -1,3 +1,4 @@
+import 'package:animated_card/animated_card.dart';
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:salon/_utils/app_config.dart';
@@ -15,49 +16,51 @@ class PerfilPage extends StatelessWidget {
   Widget build(BuildContext context) {
     bool load = false;
     final user = Provider.of<Auth>(context).user;
-    return Container(
-      width: double.infinity,
-      margin: EdgeInsets.symmetric(vertical: 30, horizontal: 40),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Header('Meu Perfil'),
-            Spacer(),
-            ClipRRect(
-              borderRadius:BorderRadius.all(Radius.circular(100)),
-              child: Image.network(
-                user!.image, 
-                height: 200,
-                width: 200,
-                fit: BoxFit.cover,
-                loadingBuilder: (BuildContext context, Widget child, loadingProgress) {
-                  if (loadingProgress == null && !load) {
-                    load = true;
-                    return Container( 
-                      height: 200, 
-                      width: 200,
-                      child: Center(child: CircularProgressIndicator(color: markPrimaryColor,),)
-                    );
-                  }
-                  return child; 
-                } 
-              ), 
-            ),
-            SizedBox(height: 30,),
-            RowInfo(user.name, Icons.person, FontWeight.bold),
-            RowInfo(user.email, Icons.mail),
-            RowInfo(user.phone, Icons.phone),
-            SizedBox(height: 60,),
-            Row(
-              children: [
-                Expanded(child: PrimaryButton('EDITAR', ()=> Navigator.pushNamed(context, AppRoutes.EDITAR_PERFIL, arguments: user))),
-                SizedBox(width: 30,),
-                Expanded(child: PrimaryButton('SAIR', ()=> Provider.of<Auth>(context, listen: false).logout() )),
-              ],
-            ),
-            Spacer()
-          ]
-        )
+    return AnimatedCard(
+      child: Container(
+        width: double.infinity,
+        margin: EdgeInsets.symmetric(vertical: 30, horizontal: 40),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: [
+              Header('Meu Perfil'),
+              Spacer(),
+              ClipRRect(
+                borderRadius:BorderRadius.all(Radius.circular(100)),
+                child: Image.network(
+                  user!.image, 
+                  height: 200,
+                  width: 200,
+                  fit: BoxFit.cover,
+                  loadingBuilder: (BuildContext context, Widget child, loadingProgress) {
+                    if (loadingProgress == null && !load) {
+                      load = true;
+                      return Container( 
+                        height: 200, 
+                        width: 200,
+                        child: Center(child: CircularProgressIndicator(color: markPrimaryColor,),)
+                      );
+                    }
+                    return child; 
+                  } 
+                ), 
+              ),
+              SizedBox(height: 30,),
+              RowInfo(user.name, Icons.person, FontWeight.bold),
+              RowInfo(user.email, Icons.mail),
+              RowInfo(user.phone, Icons.phone),
+              SizedBox(height: 60,),
+              Row(
+                children: [
+                  Expanded(child: PrimaryButton('EDITAR', ()=> Navigator.pushNamed(context, AppRoutes.EDITAR_PERFIL, arguments: user))),
+                  SizedBox(width: 30,),
+                  Expanded(child: PrimaryButton('SAIR', ()=> Provider.of<Auth>(context, listen: false).logout() )),
+                ],
+              ),
+              Spacer()
+            ]
+          )
+      ),
     );
   }
 }
