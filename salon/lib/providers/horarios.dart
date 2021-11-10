@@ -9,12 +9,8 @@ import 'package:salon/models/procedimento_model.dart';
 class Horarios with ChangeNotifier {
   late FirebaseFirestore db;
 
-  String _token;
-
   List<HorarioModel> _horarios = [];
   List<HorarioModel> _historico = [];
-  
-  Horarios(this._token, this._historico, this._horarios);
 
   List<HorarioModel> historicoId(String id) {
     return [..._historico].where((element) => element.userId == id).toList();
