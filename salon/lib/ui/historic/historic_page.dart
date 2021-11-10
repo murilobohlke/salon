@@ -47,10 +47,12 @@ class _HistoricPageState extends State<HistoricPage> {
                 ? Center(child: CircularProgressIndicator(color: markPrimaryColor,),)
                 : h.length == 0 
                 ? Center(child: Text('Sem histórico', style: TextStyle(fontSize: 16),))
-                : ListView.builder(
-                  shrinkWrap: true,
-                  itemCount: h.length,
-                  itemBuilder: (context, index) => AnimatedCard(child: HistoricTile(h[index]))
+                : AnimatedCard(
+                  child: ListView.builder(
+                    shrinkWrap: true,
+                    itemCount: h.length,
+                    itemBuilder: (context, index) => HistoricTile(h[index])
+                  ),
                 ),
               ),
             )

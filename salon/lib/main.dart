@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:salon/providers/auth.dart';
 import 'package:salon/providers/horarios.dart';
+import 'package:salon/providers/procedimentos.dart';
 import 'package:salon/ui/my_app.dart';
 
 void main() async {
@@ -20,7 +21,8 @@ void main() async {
             previous?.horarios ?? [],
             previous?.historico ?? [],
           )
-        )
+        ),
+        ChangeNotifierProvider(create: (context) => Procedimentos()),
       ],
       child: MyApp()
     )

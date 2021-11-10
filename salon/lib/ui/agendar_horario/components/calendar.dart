@@ -2,9 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:salon/_utils/app_config.dart';
 import 'package:salon/models/horario_model.dart';
-import 'package:salon/models/type_model.dart';
+import 'package:salon/models/procedimento_model.dart';
 import 'package:salon/providers/auth.dart';
 import 'package:salon/providers/horarios.dart';
+import 'package:salon/providers/procedimentos.dart';
 import 'package:salon/ui/_common/primary_button.dart';
 import 'package:salon/ui/agendar_horario/components/input_text_agendar.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
@@ -17,11 +18,7 @@ class Calendar extends StatefulWidget {
 }
 
 class _CalendarState extends State<Calendar> {
-  final List<TypeModel> types = [
-    TypeModel('Corte Feminino', Colors.pink),
-    TypeModel('Corte Masculino', Colors.blue),
-    TypeModel('Unhas', Colors.amber),
-  ];  
+  List<ProcedimentoModel> types = [];  
   TextEditingController _nameControler = TextEditingController();
 
   String userId='';
@@ -70,7 +67,7 @@ class _CalendarState extends State<Calendar> {
                       height: 35,
                       child: RadioListTile(
                         activeColor: markPrimaryColor,
-                        title: Text(types[i].label),
+                        title: Text(types[i].type),
                         value: i, 
                         groupValue: index, 
                         onChanged: (value)=> setState(() => index = value as int)
@@ -105,7 +102,7 @@ class _CalendarState extends State<Calendar> {
       );
     } else {
       if(details.appointments!.first.userId == Provider.of<Auth>(context, listen: false).user!.id){
-        var a = types.firstWhere((element) => element.label == details.appointments!.first.type);
+        var a = types.firstWhere((element) => element.type == details.appointments!.first.type);
         index = types.indexOf(a);
         showModalBottomSheet(
         isScrollControlled: true,
@@ -132,7 +129,7 @@ class _CalendarState extends State<Calendar> {
                       height: 35,
                       child: RadioListTile(
                         activeColor: markPrimaryColor,
-                        title: Text(types[i].label),
+                        title: Text(types[i].type),
                         value: i, 
                         groupValue: index, 
                         onChanged: (value)=> setState(() => index = value as int)
@@ -207,7 +204,7 @@ class _CalendarState extends State<Calendar> {
       start: time, 
       end:  time.add(const Duration(minutes: 30)), 
       background: types[index].color, 
-      type: types[index].label,
+      type: types[index].type,
       userId: user!.id 
     );
 
@@ -218,16 +215,17 @@ class _CalendarState extends State<Calendar> {
     Navigator.pop(context);
   }
 
-  Future<void> _loadHorarios() async {
+  Future<void> _loadData() async {
     setState(() => isLoading = true);
     await Provider.of<Horarios>(context, listen: false).loadHorarios();
+    await Provider.of<Procedimentos>(context, listen: false).loadProcedimentos();
     setState(() => isLoading = false);
   }
 
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance!.addPostFrameCallback((_) => _loadHorarios());
+    WidgetsBinding.instance!.addPostFrameCallback((_) => _loadData());
     final user = Provider.of<Auth>(context, listen: false).user;
     _nameControler.text = user!.name;
     userId = user.id;
@@ -236,6 +234,7 @@ class _CalendarState extends State<Calendar> {
   @override
   Widget build(BuildContext context) {
     final h = Provider.of<Horarios>(context).horarios;
+    types = Provider.of<Procedimentos>(context).procedimentos;
     
     return isLoading
     ? Center(child: CircularProgressIndicator(color: markPrimaryColor,),)

@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 
 import 'package:salon/database/db_firestore.dart';
 import 'package:salon/models/horario_model.dart';
-import 'package:salon/models/type_model.dart';
+import 'package:salon/models/procedimento_model.dart';
 
 class Horarios with ChangeNotifier {
   late FirebaseFirestore db;
@@ -84,12 +84,12 @@ class Horarios with ChangeNotifier {
     await loadHorarios();
   }
 
-  Future<void> editHorario(String id, String name, TypeModel type) async{
+  Future<void> editHorario(String id, String name, ProcedimentoModel type) async{
     db = DBFirestore.get();
 
     await db.collection('horarios').doc(id).update({
       'name': name,
-      'type': type.label,
+      'type': type.type,
       'color': '0xff${type.color.value.toRadixString(16).substring(2, 8)}',
     });
 
