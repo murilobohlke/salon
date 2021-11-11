@@ -51,7 +51,7 @@ class _EditPerfilPageState extends State<EditPerfilPage> {
         child: isLoading
         ? Center(child: CircularProgressIndicator(color: markPrimaryColor,),) 
         : SingleChildScrollView(
-                  child: Column(
+          child: Column(
             children: [
               SizedBox(height: 60,),
               ClipRRect(

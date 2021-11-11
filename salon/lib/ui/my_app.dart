@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:salon/_manager/ui_manager/procedimentos_manager/procedimento_details_manager_page.dart';
+import 'package:salon/_manager/ui_manager/procedimentos_manager/procedimentos_manager_page.dart';
 import 'package:salon/_utils/app_config.dart';
 import 'package:salon/_utils/app_routes.dart';
+import 'package:salon/models/procedimento_model.dart';
 import 'package:salon/models/user_model.dart';
 import 'package:salon/ui/agendar_horario/agendar_horario_page.dart';
 import 'package:salon/ui/auth_or_home.dart';
@@ -51,6 +54,8 @@ class MyApp extends StatelessWidget {
         AppRoutes.AGENDAR_HORARIO: (ctx) => AgendarHorarioPage(),
         AppRoutes.EDITAR_PERFIL: (ctx) => EditPerfilPage(ModalRoute.of(ctx)!.settings.arguments as UserModel),
         AppRoutes.VALORES: (ctx) => ValoresPage(),
+        AppRoutes.PROCEDIMENTOS_MANAGER: (ctx) => ProcedimentosManagerPage(),
+        AppRoutes.PROCEDIMENTO_DETAILS_MANAGER: (ctx) => ProcedimentoDetailsManagerPage(ModalRoute.of(ctx)!.settings.arguments == null? null :ModalRoute.of(ctx)!.settings.arguments as ProcedimentoModel),
       }
     );
   }

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:salon/_manager/ui_manager/bottom_navigator_manager/bottom_navigator_manager.dart';
 import 'package:salon/_utils/app_config.dart';
 import 'package:salon/providers/auth.dart';
 import 'package:salon/ui/auth/auth_page.dart';
@@ -22,7 +23,7 @@ class AuthOrHomePage extends StatelessWidget {
               child: Text('Ocorreu um erro!'),
             );
           } else {
-            return auth.isAuth ? BottomNavigator() : AuthPage();
+            return !auth.isAuth ? AuthPage() : auth.email!.contains('@saloon.com') ? BottomNavigatorManager() : BottomNavigator();
           }
         },
       ),
