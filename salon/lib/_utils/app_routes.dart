@@ -5,4 +5,5 @@ class AppRoutes {
   static const VALORES = '/valores';
   static const PROCEDIMENTOS_MANAGER = '/procedimentos-manager';
   static const PROCEDIMENTO_DETAILS_MANAGER = '/procedimento-details-manager';
+  static const HORARIOS_MANAGER = '/horarios-manager';
 }

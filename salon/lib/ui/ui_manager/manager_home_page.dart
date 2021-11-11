@@ -54,7 +54,7 @@ class ManagerHomePage extends StatelessWidget {
               CardButton(
                 'HORÁRIOS', 
                 Icons.calendar_today,
-                () => Navigator.pushNamed(context, AppRoutes.AGENDAR_HORARIO)
+                () => Navigator.pushNamed(context, AppRoutes.HORARIOS_MANAGER)
               ),
               SizedBox(height: 30,),
               CardButton(

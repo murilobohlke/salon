@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:salon/_utils/app_config.dart';
 import 'package:salon/models/horario_model.dart';
@@ -7,22 +8,21 @@ import 'package:salon/providers/auth.dart';
 import 'package:salon/providers/horarios.dart';
 import 'package:salon/providers/procedimentos.dart';
 import 'package:salon/ui/_common/primary_button.dart';
-import 'package:salon/ui/agendar_horario/components/input_text_agendar.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
-class Calendar extends StatefulWidget {
-  const Calendar({ Key? key }) : super(key: key);
+class CalendarManager extends StatefulWidget {
+  const CalendarManager({ Key? key }) : super(key: key);
 
   @override
-  _CalendarState createState() => _CalendarState();
+  _CalendarManagerState createState() => _CalendarManagerState();
 }
 
-class _CalendarState extends State<Calendar> {
+class _CalendarManagerState extends State<CalendarManager> {
   List<ProcedimentoModel> types = [];  
   TextEditingController _nameControler = TextEditingController();
 
   String userId='';
-  String error='';
+
 
   bool isLoading = false;
   bool isSaving = false;
@@ -35,17 +35,17 @@ class _CalendarState extends State<Calendar> {
     DateTime.now().minute < 30 ? DateTime.now().hour : DateTime.now().hour + 1,
     DateTime.now().minute < 30 ? 30 : 0,
   );
-
+  
   _showModal(CalendarTapDetails details) {
-    print(details.date);
-    print(minDate);
-    //&& details.date.isAfter(minDate)
+    var initialTime = DateTime(2021, details.date!.month, details.date!.day, details.date!.hour, details.date!.minute , 0 );
+    var endTime = initialTime.add(const Duration(minutes: 30));
+    final formatter = DateFormat('HH:mm');
+
     if(details.appointments == null) {
       showModalBottomSheet(
         isScrollControlled: true,
         context: context, 
         builder: (context) {
-          error = '';
           return StatefulBuilder(
           builder: (BuildContext context, StateSetter setState) {
             return Container(
@@ -55,24 +55,64 @@ class _CalendarState extends State<Calendar> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Agendamento de Horário', textAlign: TextAlign.center, style: TextStyle(color: markPrimaryColor, fontSize: 18, fontWeight: FontWeight.bold),),
+                  Text('Horário Indisponível', textAlign: TextAlign.center, style: TextStyle(color: markPrimaryColor, fontSize: 18, fontWeight: FontWeight.bold),),
                   SizedBox(height: 20,),
-                  InputTextAgendar(label: 'Nome', controller: _nameControler),
-                  SizedBox(height: 10,),
-                  Text('Selecione o Tipo', textAlign: TextAlign.center, style: TextStyle(color: markPrimaryColor, fontSize: 16,),),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: types.length,
-                    itemBuilder: (context, i) => Container(
-                      height: 35,
-                      child: RadioListTile(
-                        activeColor: markPrimaryColor,
-                        title: Text(types[i].type),
-                        value: i, 
-                        groupValue: index, 
-                        onChanged: (value)=> setState(() => index = value as int)
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Começo:   ',
+                        style: TextStyle(fontSize: 18),
                       ),
-                    ),
+                      Text(
+                        formatter.format(initialTime),
+                        style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 20,),
+                      IconButton(
+                        onPressed: (){
+                          if(initialTime.add(Duration(minutes: 30)).isBefore(endTime))
+                          setState(() => initialTime = initialTime.add(Duration(minutes: 30)));
+                        }, 
+                        icon: Icon(Icons.add, color: markPrimaryColor)
+                      ),
+                      SizedBox(width: 20,),
+                      IconButton(
+                        onPressed: (){
+                          setState(() => initialTime = initialTime.subtract(Duration(minutes: 30)));
+                        }, 
+                        icon: Icon(Icons.remove, color: markPrimaryColor)
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 20,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Fim:   ',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        formatter.format(endTime),
+                        style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 20,),
+                      IconButton(
+                        onPressed: (){
+                          setState(() => endTime = endTime.add(Duration(minutes: 30)));
+                        }, 
+                        icon: Icon(Icons.add, color: markPrimaryColor)
+                      ),
+                      SizedBox(width: 20,),
+                      IconButton(
+                        onPressed: (){
+                          if(endTime.subtract(Duration(minutes: 30)).isAfter(initialTime))
+                          setState(() => endTime = endTime.subtract(Duration(minutes: 30)));
+                        }, 
+                        icon: Icon(Icons.remove, color: markPrimaryColor)
+                      )
+                    ],
                   ),
                   SizedBox(height: 20,),
                   if(isSaving)
@@ -85,7 +125,7 @@ class _CalendarState extends State<Calendar> {
                           'SALVAR', 
                           () async {
                             setState(() => isSaving = true);
-                            await _onSave(details);
+                            await _onSave(initialTime, endTime);
                             setState(() => isSaving = false);
                           }
                         )
@@ -93,7 +133,6 @@ class _CalendarState extends State<Calendar> {
                     ],
                   ),
                   SizedBox(height: 15,),
-                  Text(error, style: TextStyle(fontSize: 18, color: Colors.red[700], fontWeight: FontWeight.bold),)
                 ],
               ),
             );
@@ -102,8 +141,9 @@ class _CalendarState extends State<Calendar> {
       );
     } else {
       if(details.appointments!.first.userId == Provider.of<Auth>(context, listen: false).user!.id){
-        var a = types.firstWhere((element) => element.type == details.appointments!.first.type);
-        index = types.indexOf(a);
+        var initialTime = details.appointments!.first.start;
+        var endTime = details.appointments!.first.end;
+        
         showModalBottomSheet(
         isScrollControlled: true,
         context: context, 
@@ -117,24 +157,64 @@ class _CalendarState extends State<Calendar> {
                 mainAxisSize: MainAxisSize.min,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  Text('Editar Horário', textAlign: TextAlign.center, style: TextStyle(color: markPrimaryColor, fontSize: 18, fontWeight: FontWeight.bold),),
+                  Text('Editar Horário Indisponível', textAlign: TextAlign.center, style: TextStyle(color: markPrimaryColor, fontSize: 18, fontWeight: FontWeight.bold),),
                   SizedBox(height: 20,),
-                  InputTextAgendar(label: 'Nome', controller: _nameControler),
-                  SizedBox(height: 10,),
-                  Text('Selecione o Tipo', textAlign: TextAlign.center, style: TextStyle(color: markPrimaryColor, fontSize: 16,),),
-                  ListView.builder(
-                    shrinkWrap: true,
-                    itemCount: types.length,
-                    itemBuilder: (context, i) => Container(
-                      height: 35,
-                      child: RadioListTile(
-                        activeColor: markPrimaryColor,
-                        title: Text(types[i].type),
-                        value: i, 
-                        groupValue: index, 
-                        onChanged: (value)=> setState(() => index = value as int)
+                   Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Começo:   ',
+                        style: TextStyle(fontSize: 18),
                       ),
-                    ),
+                      Text(
+                        formatter.format(initialTime),
+                        style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 20,),
+                      IconButton(
+                        onPressed: (){
+                          if(initialTime.add(Duration(minutes: 30)).isBefore(endTime))
+                          setState(() => initialTime = initialTime.add(Duration(minutes: 30)));
+                        }, 
+                        icon: Icon(Icons.add, color: markPrimaryColor)
+                      ),
+                      SizedBox(width: 20,),
+                      IconButton(
+                        onPressed: (){
+                          setState(() => initialTime = initialTime.subtract(Duration(minutes: 30)));
+                        }, 
+                        icon: Icon(Icons.remove, color: markPrimaryColor)
+                      )
+                    ],
+                  ),
+                  SizedBox(height: 20,),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Fim:   ',
+                        style: TextStyle(fontSize: 18),
+                      ),
+                      Text(
+                        formatter.format(endTime),
+                        style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
+                      ),
+                      SizedBox(width: 20,),
+                      IconButton(
+                        onPressed: (){
+                          setState(() => endTime = endTime.add(Duration(minutes: 30)));
+                        }, 
+                        icon: Icon(Icons.add, color: markPrimaryColor)
+                      ),
+                      SizedBox(width: 20,),
+                      IconButton(
+                        onPressed: (){
+                          if(endTime.subtract(Duration(minutes: 30)).isAfter(initialTime))
+                          setState(() => endTime = endTime.subtract(Duration(minutes: 30)));
+                        }, 
+                        icon: Icon(Icons.remove, color: markPrimaryColor)
+                      )
+                    ],
                   ),
                   SizedBox(height: 20,),
                   if(isSaving)
@@ -150,7 +230,7 @@ class _CalendarState extends State<Calendar> {
                       SizedBox(width: 30,),
                       Expanded(child: PrimaryButton('SALVAR', () async {
                          setState(() => isSaving = true);
-                        await _onEdit(details);
+                        await _onEdit(details, initialTime, endTime);
                          setState(() => isSaving = false);
                       })),
                     ],
@@ -164,47 +244,36 @@ class _CalendarState extends State<Calendar> {
       } else {
         ScaffoldMessenger.of(context).hideCurrentSnackBar();
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Horário Indisponível', textAlign: TextAlign.center,), backgroundColor: Colors.red[700],)
+          SnackBar(content: Text('Horário Marcado', textAlign: TextAlign.center,), backgroundColor: Colors.red[700],)
         );  
       }
     }
   }
 
-  Future<void> _onEdit(CalendarTapDetails details) async {
+  Future<void> _onEdit(CalendarTapDetails details, DateTime initialTime, DateTime endTime) async {
   
-    await Provider.of<Horarios>(context, listen: false).editHorario(details.appointments!.first.id, _nameControler.text, types[index]);
-
+    await Provider.of<Horarios>(context, listen: false).editHorarioManager(details.appointments!.first.id, initialTime, endTime);
     index = -1;
-
     Navigator.pop(context);
   }
 
   Future<void> _onDelete(CalendarTapDetails details) async {
     
     await Provider.of<Horarios>(context, listen: false).deleteHorario(details.appointments!.first.id);
-
-    index = -1;
-
     Navigator.pop(context);
   }
 
-  Future<void> _onSave(CalendarTapDetails details) async {
-
-    if(index == -1){
-      setState(() => error = 'Por favor, selecione o tipo');
-      return;
-    }
+  Future<void> _onSave(DateTime initialTime, DateTime endTime) async {
     
     final user = Provider.of<Auth>(context, listen: false).user;
-    var time = DateTime(2021, details.date!.month, details.date!.day, details.date!.hour, details.date!.minute , 0 );
     
     HorarioModel h = HorarioModel(
       id: '',
-      name: _nameControler.text, 
-      start: time, 
-      end:  time.add(const Duration(minutes: 30)), 
-      background: types[index].color, 
-      type: types[index].type,
+      name: 'INDISPONÍVEL', 
+      start: initialTime, 
+      end:  endTime, 
+      background: Colors.black54, 
+      type: '',
       userId: user!.id 
     );
 
@@ -245,16 +314,16 @@ class _CalendarState extends State<Calendar> {
       appointmentBuilder: (context, details) {
         final HorarioModel h = details.appointments.first;
         return Container(
-          color: h.userId ==  userId ? h.background : Colors.black54,
+          color: h.background,
           child: Center(
             child: ListTile(
               title: Text(
-                h.userId ==  userId ? h.name.toUpperCase() : 'Indisponível', 
+                h.name.toUpperCase(), 
                 textAlign: TextAlign.center, 
                 style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
               ),
               subtitle: Text(
-                h.userId ==  userId ? h.type : '', 
+                h.type, 
                 textAlign: TextAlign.center,
                 style: TextStyle(fontSize: 15, color: Colors.white),
               ),

@@ -1,10 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:salon/_manager/ui_manager/procedimentos_manager/components/procedimento_tile.dart';
 import 'package:salon/_utils/app_config.dart';
 import 'package:salon/_utils/app_routes.dart';
 import 'package:salon/providers/procedimentos.dart';
 import 'package:salon/ui/_common/primary_button.dart';
+
+import 'components/procedimento_tile.dart';
 
 class ProcedimentosManagerPage extends StatefulWidget {
   const ProcedimentosManagerPage({ Key? key }) : super(key: key);

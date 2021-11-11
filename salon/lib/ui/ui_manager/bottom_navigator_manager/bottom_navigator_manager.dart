@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:google_nav_bar/google_nav_bar.dart';
-import 'package:salon/_manager/ui_manager/manager_home_page.dart';
 import 'package:salon/_utils/app_config.dart';
-import 'package:salon/ui/historic/historic_page.dart';
 import 'package:salon/ui/perfil/perfil_page.dart';
+import 'package:salon/ui/ui_manager/clientes_manager/clientes_manager_page.dart';
+
+import '../manager_home_page.dart';
 
 class BottomNavigatorManager extends StatefulWidget {
   const BottomNavigatorManager({ Key? key }) : super(key: key);
@@ -16,7 +17,7 @@ class _BottomNavigatorManagerState extends State<BottomNavigatorManager> {
   int _selectedIndex = 1;
 
   static List _pages = [
-    HistoricPage(),
+    ClientesmanagerPage(),
     ManagerHomePage(),
     PerfilPage(),
   ];
@@ -43,8 +44,8 @@ class _BottomNavigatorManagerState extends State<BottomNavigatorManager> {
           color: Colors.white,
           tabs: [
             GButton(
-              icon: Icons.history,
-              text: 'Histórico',
+              icon: Icons.people,
+              text: 'Clientes',
             ),
             GButton(
               icon: Icons.home,

@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
-import 'package:salon/_manager/ui_manager/bottom_navigator_manager/bottom_navigator_manager.dart';
 import 'package:salon/_utils/app_config.dart';
 import 'package:salon/providers/auth.dart';
 import 'package:salon/ui/auth/auth_page.dart';
 import 'package:salon/ui/bottom_navigator/bottom_navigator.dart';
+import 'package:salon/ui/ui_manager/bottom_navigator_manager/bottom_navigator_manager.dart';
 
 class AuthOrHomePage extends StatelessWidget {
   const AuthOrHomePage({Key? key}) : super(key: key);

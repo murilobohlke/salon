@@ -77,7 +77,8 @@ class _FormNewUserState extends State<FormNewUser> {
                 ),
                 Positioned(
                   bottom: 0,
-                  right:100,
+                  right: 10,
+                  left: 10,
                   child: IconButton(onPressed: widget.image, icon: Icon(Icons.camera_alt, color: Colors.white))
                 )
               ],

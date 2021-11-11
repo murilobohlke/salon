@@ -92,6 +92,17 @@ class Horarios with ChangeNotifier {
     await loadHorarios();
   }
 
+  Future<void> editHorarioManager(String id, DateTime initialTime, DateTime endTime) async{
+    db = DBFirestore.get();
+
+    await db.collection('horarios').doc(id).update({
+      'end' : endTime,
+      'start' : initialTime,
+    });
+
+    await loadHorarios();
+  }
+
    Future<void> deleteHorario(String id) async{
 
     db = DBFirestore.get();

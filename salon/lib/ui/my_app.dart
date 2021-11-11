@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:google_fonts/google_fonts.dart';
-import 'package:salon/_manager/ui_manager/procedimentos_manager/procedimento_details_manager_page.dart';
-import 'package:salon/_manager/ui_manager/procedimentos_manager/procedimentos_manager_page.dart';
 import 'package:salon/_utils/app_config.dart';
 import 'package:salon/_utils/app_routes.dart';
 import 'package:salon/models/procedimento_model.dart';
@@ -10,6 +8,9 @@ import 'package:salon/models/user_model.dart';
 import 'package:salon/ui/agendar_horario/agendar_horario_page.dart';
 import 'package:salon/ui/auth_or_home.dart';
 import 'package:salon/ui/edit_perfil/edit_perfil_page.dart';
+import 'package:salon/ui/ui_manager/horarios_manager/horarios_manager_page.dart';
+import 'package:salon/ui/ui_manager/procedimentos_manager/procedimento_details_manager_page.dart';
+import 'package:salon/ui/ui_manager/procedimentos_manager/procedimentos_manager_page.dart';
 import 'package:salon/ui/valores/valores_page.dart';
 import 'package:syncfusion_localizations/syncfusion_localizations.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
@@ -56,6 +57,7 @@ class MyApp extends StatelessWidget {
         AppRoutes.VALORES: (ctx) => ValoresPage(),
         AppRoutes.PROCEDIMENTOS_MANAGER: (ctx) => ProcedimentosManagerPage(),
         AppRoutes.PROCEDIMENTO_DETAILS_MANAGER: (ctx) => ProcedimentoDetailsManagerPage(ModalRoute.of(ctx)!.settings.arguments == null? null :ModalRoute.of(ctx)!.settings.arguments as ProcedimentoModel),
+        AppRoutes.HORARIOS_MANAGER: (ctx) => HorariosManagerPage(),
       }
     );
   }
