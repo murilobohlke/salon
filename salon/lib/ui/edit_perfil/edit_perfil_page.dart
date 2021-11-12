@@ -41,6 +41,7 @@ class _EditPerfilPageState extends State<EditPerfilPage> {
      _nameController.text = widget.user.name;
      _phoneController.text = widget.user.phone;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(

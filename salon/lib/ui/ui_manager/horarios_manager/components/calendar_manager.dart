@@ -2,12 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:salon/_utils/app_config.dart';
+import 'package:salon/_utils/horario_data_source.dart';
 import 'package:salon/models/horario_model.dart';
 import 'package:salon/models/procedimento_model.dart';
 import 'package:salon/providers/auth.dart';
 import 'package:salon/providers/horarios.dart';
 import 'package:salon/providers/procedimentos.dart';
-import 'package:salon/ui/_common/primary_button.dart';
+import 'package:salon/ui/_common/horario_modal.dart';
+import 'package:salon/ui/ui_manager/horarios_manager/components/indisponivel_modal.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class CalendarManager extends StatefulWidget {
@@ -22,7 +24,7 @@ class _CalendarManagerState extends State<CalendarManager> {
   TextEditingController _nameControler = TextEditingController();
 
   String userId='';
-
+  String error='';
 
   bool isLoading = false;
   bool isSaving = false;
@@ -35,253 +37,34 @@ class _CalendarManagerState extends State<CalendarManager> {
     DateTime.now().minute < 30 ? DateTime.now().hour : DateTime.now().hour + 1,
     DateTime.now().minute < 30 ? 30 : 0,
   );
-  
-  _showModal(CalendarTapDetails details) {
-    var initialTime = DateTime(2021, details.date!.month, details.date!.day, details.date!.hour, details.date!.minute , 0 );
-    var endTime = initialTime.add(const Duration(minutes: 30));
-    final formatter = DateFormat('HH:mm');
 
-    if(details.appointments == null) {
+  final formatter = DateFormat('HH:mm');
+
+  _showModalIndisponivel(CalendarLongPressDetails details) {
+    if(details.appointments == null || details.appointments!.first.userId == userId  && details.appointments!.first.type == ''){
       showModalBottomSheet(
         isScrollControlled: true,
         context: context, 
-        builder: (context) {
-          return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Container(
-              padding: MediaQuery.of(context).viewInsets,
-              margin: EdgeInsets.symmetric(horizontal: 30, vertical: 20),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Horário Indisponível', textAlign: TextAlign.center, style: TextStyle(color: markPrimaryColor, fontSize: 18, fontWeight: FontWeight.bold),),
-                  SizedBox(height: 20,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Começo:   ',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        formatter.format(initialTime),
-                        style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(width: 20,),
-                      IconButton(
-                        onPressed: (){
-                          if(initialTime.add(Duration(minutes: 30)).isBefore(endTime))
-                          setState(() => initialTime = initialTime.add(Duration(minutes: 30)));
-                        }, 
-                        icon: Icon(Icons.add, color: markPrimaryColor)
-                      ),
-                      SizedBox(width: 20,),
-                      IconButton(
-                        onPressed: (){
-                          setState(() => initialTime = initialTime.subtract(Duration(minutes: 30)));
-                        }, 
-                        icon: Icon(Icons.remove, color: markPrimaryColor)
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 20,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Fim:   ',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        formatter.format(endTime),
-                        style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(width: 20,),
-                      IconButton(
-                        onPressed: (){
-                          setState(() => endTime = endTime.add(Duration(minutes: 30)));
-                        }, 
-                        icon: Icon(Icons.add, color: markPrimaryColor)
-                      ),
-                      SizedBox(width: 20,),
-                      IconButton(
-                        onPressed: (){
-                          if(endTime.subtract(Duration(minutes: 30)).isAfter(initialTime))
-                          setState(() => endTime = endTime.subtract(Duration(minutes: 30)));
-                        }, 
-                        icon: Icon(Icons.remove, color: markPrimaryColor)
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 20,),
-                  if(isSaving)
-                  CircularProgressIndicator(color: markPrimaryColor,)
-                  else
-                  Row(
-                    children: [
-                      Expanded(
-                        child: PrimaryButton(
-                          'SALVAR', 
-                          () async {
-                            setState(() => isSaving = true);
-                            await _onSave(initialTime, endTime);
-                            setState(() => isSaving = false);
-                          }
-                        )
-                      ),
-                    ],
-                  ),
-                  SizedBox(height: 15,),
-                ],
-              ),
-            );
-          });
-        }
+        builder: (context) => IndisponivelModal(details)
       );
-    } else {
-      if(details.appointments!.first.userId == Provider.of<Auth>(context, listen: false).user!.id){
-        var initialTime = details.appointments!.first.start;
-        var endTime = details.appointments!.first.end;
-        
-        showModalBottomSheet(
-        isScrollControlled: true,
-        context: context, 
-        builder: (context) {
-          return StatefulBuilder(
-          builder: (BuildContext context, StateSetter setState) {
-            return Container(
-              padding: MediaQuery.of(context).viewInsets,
-              margin: EdgeInsets.symmetric(horizontal: 30, vertical: 40),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text('Editar Horário Indisponível', textAlign: TextAlign.center, style: TextStyle(color: markPrimaryColor, fontSize: 18, fontWeight: FontWeight.bold),),
-                  SizedBox(height: 20,),
-                   Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Começo:   ',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        formatter.format(initialTime),
-                        style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(width: 20,),
-                      IconButton(
-                        onPressed: (){
-                          if(initialTime.add(Duration(minutes: 30)).isBefore(endTime))
-                          setState(() => initialTime = initialTime.add(Duration(minutes: 30)));
-                        }, 
-                        icon: Icon(Icons.add, color: markPrimaryColor)
-                      ),
-                      SizedBox(width: 20,),
-                      IconButton(
-                        onPressed: (){
-                          setState(() => initialTime = initialTime.subtract(Duration(minutes: 30)));
-                        }, 
-                        icon: Icon(Icons.remove, color: markPrimaryColor)
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 20,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        'Fim:   ',
-                        style: TextStyle(fontSize: 18),
-                      ),
-                      Text(
-                        formatter.format(endTime),
-                        style: TextStyle(fontSize: 21, fontWeight: FontWeight.bold),
-                      ),
-                      SizedBox(width: 20,),
-                      IconButton(
-                        onPressed: (){
-                          setState(() => endTime = endTime.add(Duration(minutes: 30)));
-                        }, 
-                        icon: Icon(Icons.add, color: markPrimaryColor)
-                      ),
-                      SizedBox(width: 20,),
-                      IconButton(
-                        onPressed: (){
-                          if(endTime.subtract(Duration(minutes: 30)).isAfter(initialTime))
-                          setState(() => endTime = endTime.subtract(Duration(minutes: 30)));
-                        }, 
-                        icon: Icon(Icons.remove, color: markPrimaryColor)
-                      )
-                    ],
-                  ),
-                  SizedBox(height: 20,),
-                  if(isSaving)
-                  CircularProgressIndicator(color: markPrimaryColor,)
-                  else
-                  Row(
-                    children: [
-                      Expanded(child: PrimaryButton('EXCLUÍR', () async {
-                         setState(() => isSaving = true);
-                        await _onDelete(details);
-                         setState(() => isSaving = false);
-                      })),
-                      SizedBox(width: 30,),
-                      Expanded(child: PrimaryButton('SALVAR', () async {
-                         setState(() => isSaving = true);
-                        await _onEdit(details, initialTime, endTime);
-                         setState(() => isSaving = false);
-                      })),
-                    ],
-                  ),
-                ],
-              ),
-            );
-          });
-        }
-      );
-      } else {
-        ScaffoldMessenger.of(context).hideCurrentSnackBar();
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Horário Marcado', textAlign: TextAlign.center,), backgroundColor: Colors.red[700],)
-        );  
-      }
     }
   }
-
-  Future<void> _onEdit(CalendarTapDetails details, DateTime initialTime, DateTime endTime) async {
   
-    await Provider.of<Horarios>(context, listen: false).editHorarioManager(details.appointments!.first.id, initialTime, endTime);
-    index = -1;
-    Navigator.pop(context);
-  }
-
-  Future<void> _onDelete(CalendarTapDetails details) async {
-    
-    await Provider.of<Horarios>(context, listen: false).deleteHorario(details.appointments!.first.id);
-    Navigator.pop(context);
-  }
-
-  Future<void> _onSave(DateTime initialTime, DateTime endTime) async {
-    
-    final user = Provider.of<Auth>(context, listen: false).user;
-    
-    HorarioModel h = HorarioModel(
-      id: '',
-      name: 'INDISPONÍVEL', 
-      start: initialTime, 
-      end:  endTime, 
-      background: Colors.black54, 
-      type: '',
-      userId: user!.id 
-    );
-
-    await Provider.of<Horarios>(context, listen: false).addHorario(h);
-  
-    index = -1;
-
-    Navigator.pop(context);
+  _showModal(CalendarTapDetails details) {
+    if(details.appointments == null || details.appointments!.first.userId == userId && details.appointments!.first.type != ''){
+      showModalBottomSheet(
+        isScrollControlled: true,
+        context: context, 
+        builder: (_) => HorarioModal(details)
+      );
+    } else{
+      if(details.appointments!.first.userId != userId){
+        ScaffoldMessenger.of(context).hideCurrentSnackBar();
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Horário marcado por usuário', textAlign: TextAlign.center,), backgroundColor: Colors.red[700], )
+        );
+      }
+    }
   }
 
   Future<void> _loadData() async {
@@ -310,6 +93,7 @@ class _CalendarManagerState extends State<CalendarManager> {
     : SfCalendar(
       minDate: minDate,
       onTap: _showModal,
+      onLongPress: _showModalIndisponivel,
       firstDayOfWeek: 1,
       appointmentBuilder: (context, details) {
         final HorarioModel h = details.appointments.first;
@@ -344,7 +128,7 @@ class _CalendarManagerState extends State<CalendarManager> {
         timeInterval: Duration(minutes: 30), 
         timeFormat: 'HH:mm'
       ),
-      dataSource: MeetingDataSource(h),
+      dataSource: HorarioDataSource(h),
       headerStyle: CalendarHeaderStyle(
         textAlign: TextAlign.center,
         backgroundColor: markSecondaryColor,
@@ -359,33 +143,3 @@ class _CalendarManagerState extends State<CalendarManager> {
   }
 }
 
-class MeetingDataSource extends CalendarDataSource {
-  MeetingDataSource(List<HorarioModel> source){
-    appointments = source;
-  }
-
-  @override
-  DateTime getStartTime(int index) {
-    return appointments![index].start;
-  }
-
-  @override
-  DateTime getEndTime(int index) {
-    return appointments![index].end;
-  }
-
-  @override
-  String getSubject(int index) {
-    return appointments![index].name;
-  }
-
-  @override
-  Color getColor(int index) {
-    return appointments![index].background;
-  }
-
-  @override
-  bool isAllDay(int index) {
-    return false;
-  }
-}

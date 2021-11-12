@@ -43,6 +43,8 @@ class _ClientesmanagerPageState extends State<ClientesmanagerPage> {
             children: [
               Header('Meus Clientes'),
               SizedBox(height: 30,),
+              Text('Total de Clientes: ${clientes.length}', style: TextStyle(fontSize: 18),),
+              SizedBox(height: 20,),
               ListView.builder(
                 shrinkWrap: true,
                 itemCount: clientes.length,
