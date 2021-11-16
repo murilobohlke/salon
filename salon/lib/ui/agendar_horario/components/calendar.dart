@@ -8,8 +8,6 @@ import 'package:salon/providers/auth.dart';
 import 'package:salon/providers/horarios.dart';
 import 'package:salon/providers/procedimentos.dart';
 import 'package:salon/ui/_common/horario_modal.dart';
-import 'package:salon/ui/_common/primary_button.dart';
-import 'package:salon/ui/agendar_horario/components/input_text_agendar.dart';
 import 'package:syncfusion_flutter_calendar/calendar.dart';
 
 class Calendar extends StatefulWidget {

@@ -16,7 +16,7 @@ class ClientesmanagerPage extends StatefulWidget {
 class _ClientesmanagerPageState extends State<ClientesmanagerPage> {
   bool isLoading = false;
 
-   Future<void> _loadData() async {
+  Future<void> _loadData() async {
     setState(() => isLoading = true);
     await Provider.of<Clientes>(context, listen: false).loadClientes();
     setState(() => isLoading = false);
