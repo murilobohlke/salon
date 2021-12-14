@@ -109,7 +109,9 @@ class _CalendarState extends State<Calendar> {
       timeSlotViewSettings: TimeSlotViewSettings(
         timeIntervalHeight: 70,
         timeInterval: Duration(minutes: 30), 
-        timeFormat: 'HH:mm'
+        timeFormat: 'HH:mm',
+        startHour: 8,
+        endHour: 20,
       ),
       dataSource: HorarioDataSource(h),
       headerStyle: CalendarHeaderStyle(
