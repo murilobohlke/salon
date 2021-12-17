@@ -23,7 +23,7 @@ class AuthOrHomePage extends StatelessWidget {
               child: Text('Ocorreu um erro!'),
             );
           } else {
-            return !auth.isAuth ? AuthPage() : auth.email!.contains('@saloon.com') ? BottomNavigatorManager() : BottomNavigator();
+            return !auth.isAuth ? AuthPage() : auth.email! == 'juliana@salon.com' ? BottomNavigatorManager() : BottomNavigator();
           }
         },
       ),

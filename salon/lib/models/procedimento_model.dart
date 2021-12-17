@@ -6,8 +6,9 @@ class ProcedimentoModel {
   final String type;
   final String price;
   final Color color;
+  final DateTime time;
 
-  ProcedimentoModel(this.id, this.type, this.price, this.color);
+  ProcedimentoModel(this.id, this.type, this.price, this.color, this.time);
 
 
 }

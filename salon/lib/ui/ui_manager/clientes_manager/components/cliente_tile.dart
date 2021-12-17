@@ -4,12 +4,13 @@ import 'package:salon/models/user_model.dart';
 
 class ClienteTile extends StatelessWidget {
   final UserModel user;
+  final int total;
 
-  const ClienteTile(this.user);
+  const ClienteTile(this.user, this.total);
 
   @override
   Widget build(BuildContext context) {
-    bool load = false;
+    
     return Card(
       margin: EdgeInsets.symmetric(vertical: 10),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(50),),
@@ -23,17 +24,6 @@ class ClienteTile extends StatelessWidget {
             height: 60, 
             width: 60, 
             fit: BoxFit.cover,
-            loadingBuilder: (BuildContext context, Widget child, loadingProgress) {
-              if (loadingProgress == null && !load) {
-                load = true;
-                return Container( 
-                  height: 60, 
-                  width: 60,
-                  child: Center(child: CircularProgressIndicator(color: markPrimaryColor,),)
-                );
-              }
-              return child; 
-            } 
           )
         ),
         title: Row(
@@ -52,7 +42,19 @@ class ClienteTile extends StatelessWidget {
             Text(user.phone, textAlign: TextAlign.center, style: TextStyle(color: Colors.white, fontSize: 16),),
           ],
         ),
-        trailing: Text(''),
+        trailing: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Text(
+              'Horários',
+              style: TextStyle(color: Colors.white, fontSize: 16, fontWeight: FontWeight.bold),
+            ),
+            Text(
+              '$total',
+              style: TextStyle(color: Colors.white, fontSize: 16),
+            ),
+          ],
+        ),
       )
     );
   }

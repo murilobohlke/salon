@@ -11,11 +11,10 @@ import 'package:salon/ui/perfil/components/row_info.dart';
 class PerfilPage extends StatelessWidget {
   const PerfilPage({ Key? key }) : super(key: key);
 
-
   @override
   Widget build(BuildContext context) {
-    bool load = false;
     final user = Provider.of<Auth>(context).user;
+    
     return AnimatedCard(
       child: Container(
         width: double.infinity,
@@ -32,17 +31,6 @@ class PerfilPage extends StatelessWidget {
                   height: 200,
                   width: 200,
                   fit: BoxFit.cover,
-                  loadingBuilder: (BuildContext context, Widget child, loadingProgress) {
-                    if (loadingProgress == null && !load) {
-                      load = true;
-                      return Container( 
-                        height: 200, 
-                        width: 200,
-                        child: Center(child: CircularProgressIndicator(color: markPrimaryColor,),)
-                      );
-                    }
-                    return child; 
-                  } 
                 ), 
               ),
               SizedBox(height: 30,),

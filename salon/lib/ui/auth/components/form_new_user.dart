@@ -87,7 +87,7 @@ class _FormNewUserState extends State<FormNewUser> {
             InputTextWidget(
               key: ValueKey('name'),
               controller: widget.nameController,
-              label: 'Nome', 
+              label: 'Nome e Sobrenome', 
               icon: Icons.person,
               keyboarType: TextInputType.name, 
               focus: widget.nameFocus,

@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:salon/_utils/app_config.dart';
 import 'package:salon/providers/clientes.dart';
+import 'package:salon/providers/horarios.dart';
 import 'package:salon/ui/_common/header.dart';
 import 'package:salon/ui/ui_manager/clientes_manager/components/cliente_tile.dart';
 
@@ -19,6 +20,7 @@ class _ClientesmanagerPageState extends State<ClientesmanagerPage> {
   Future<void> _loadData() async {
     setState(() => isLoading = true);
     await Provider.of<Clientes>(context, listen: false).loadClientes();
+    await Provider.of<Horarios>(context, listen: false).loadHorarios();
     setState(() => isLoading = false);
   }
 
@@ -30,6 +32,8 @@ class _ClientesmanagerPageState extends State<ClientesmanagerPage> {
   @override
   Widget build(BuildContext context) {
     final clientes = Provider.of<Clientes>(context).clientes;
+    final total = Provider.of<Horarios>(context).total;
+    final horarios = Provider.of<Horarios>(context);
 
     return isLoading
     ? Center(child: CircularProgressIndicator(color: markPrimaryColor,),) 
@@ -44,11 +48,12 @@ class _ClientesmanagerPageState extends State<ClientesmanagerPage> {
               Header('Meus Clientes'),
               SizedBox(height: 30,),
               Text('Total de Clientes: ${clientes.length}', style: TextStyle(fontSize: 18),),
+              Text('Total de Horários Marcados: $total', style: TextStyle(fontSize: 18),),
               SizedBox(height: 20,),
               ListView.builder(
                 shrinkWrap: true,
                 itemCount: clientes.length,
-                itemBuilder: (context, index) => ClienteTile(clientes[index])
+                itemBuilder: (context, index) => ClienteTile(clientes[index], horarios.totalHorariosId(clientes[index].id))
               )
             ]
           )

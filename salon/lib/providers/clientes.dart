@@ -20,7 +20,7 @@ class Clientes with ChangeNotifier {
     var snapshot = await db.collection('users').get();
 
     snapshot.docs.forEach((element) {
-      if(!element['email'].toString().contains('@saloon.com')){
+      if(!element['email'].toString().contains('@salon.com')){
         var c = UserModel(
         name: element['name'], 
         email:  element['email'], 

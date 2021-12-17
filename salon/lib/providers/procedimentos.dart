@@ -23,7 +23,7 @@ class Procedimentos with ChangeNotifier {
     var snapshot = await db.collection('procedimentos').get();
 
     snapshot.docs.forEach((element) {
-      final p = ProcedimentoModel(element.reference.id, element['type'], element['price'], Color(int.parse(element['color'])),); 
+      final p = ProcedimentoModel(element.reference.id, element['type'], element['price'], Color(int.parse(element['color'])),(element['time'] as Timestamp).toDate()); 
       _procedimentos.add(p);
     });
 
@@ -39,6 +39,7 @@ class Procedimentos with ChangeNotifier {
       'type': p.type,
       'price': p.price,
       'color': '0xff${p.color.value.toRadixString(16).substring(2, 8)}',
+      'time': p.time
     });
 
     await loadProcedimentos();
@@ -51,6 +52,7 @@ class Procedimentos with ChangeNotifier {
       'type': p.type,
       'price': p.price,
       'color': '0xff${p.color.value.toRadixString(16).substring(2, 8)}',
+      'time': p.time
     });
 
     await loadProcedimentos();

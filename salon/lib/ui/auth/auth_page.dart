@@ -54,6 +54,7 @@ class _AuthPageState extends State<AuthPage> {
     _confirmPasswordController.text = '';
     _nameController.text = '';
     _phoneController.text = '';
+    FocusScope.of(context).unfocus();
     setState(() => isLogin = !isLogin);
   }
 

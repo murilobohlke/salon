@@ -26,12 +26,45 @@ class _HorarioModalState extends State<HorarioModal> {
   int index = -1;
   String error = '';
 
-  List<ProcedimentoModel> types = [];
-
+  late List<ProcedimentoModel> types;
   late String userId;
 
+  bool isPossible(DateTime start, DateTime end){
+    bool resp = true;
+    final h = Provider.of<Horarios>(context, listen: false).horarios.where(
+      (element) => (element.start.day == start.day && element.start.month == start.month && element.start.year == start.year )
+    );
+
+    h.forEach((element) {
+      if(start.isBefore(element.start) && end.isAfter(element.start)){
+        resp = false;
+      } 
+      
+    });
+    
+    return resp;
+  }
+
   Future<void> _onEdit(CalendarTapDetails details) async {
-    await Provider.of<Horarios>(context, listen: false).editHorario(details.appointments!.first.id, _nameController.text, types[index]);
+    var start = DateTime(2021, details.date!.month, details.date!.day, details.date!.hour, details.date!.minute, 0 );
+    var end = start.add(Duration(hours: types[index].time.hour, minutes: types[index].time.minute));
+
+    if(!isPossible(start,end)){
+      setState(() => error = 'Tempo insuficiente');
+      return;
+    }
+
+    HorarioModel h = HorarioModel(
+      id: details.appointments!.first.id,
+      name: _nameController.text, 
+      start: start, 
+      end:  end, 
+      background: types[index].color, 
+      type: types[index].type,
+      userId: userId
+    );
+
+    await Provider.of<Horarios>(context, listen: false).editHorario(h);
     index = -1;
     Navigator.pop(context);
   }
@@ -47,18 +80,23 @@ class _HorarioModalState extends State<HorarioModal> {
       setState(() => error = 'Por favor, selecione o tipo');
       return;
     }
-    
-    final user = Provider.of<Auth>(context, listen: false).user;
-    var time = DateTime(2021, details.date!.month, details.date!.day, details.date!.hour, details.date!.minute , 0 );
-    
+
+    var start = DateTime(2021, details.date!.month, details.date!.day, details.date!.hour, details.date!.minute, 0 );
+    var end = start.add(Duration(hours: types[index].time.hour, minutes: types[index].time.minute));
+
+    if(!isPossible(start,end)){
+      setState(() => error = 'Tempo insuficiente');
+      return;
+    }
+
     HorarioModel h = HorarioModel(
       id: '',
       name: _nameController.text, 
-      start: time, 
-      end:  time.add(const Duration(minutes: 30)), 
+      start: start, 
+      end:  end, 
       background: types[index].color, 
       type: types[index].type,
-      userId: user!.id 
+      userId: userId
     );
 
     await Provider.of<Horarios>(context, listen: false).addHorario(h);
@@ -74,9 +112,9 @@ class _HorarioModalState extends State<HorarioModal> {
 
     widget.details.appointments == null ? _nameController.text = user!.name : _nameController.text = widget.details.appointments!.first.name;
     userId = user!.id;
+    types = Provider.of<Procedimentos>(context, listen: false).procedimentos;
     
     if(widget.details.appointments != null){
-      types = Provider.of<Procedimentos>(context, listen: false).procedimentos;
       var p = types.firstWhere((element) => element.type == widget.details.appointments!.first.type);
       index = types.indexOf(p);
     }
@@ -84,7 +122,6 @@ class _HorarioModalState extends State<HorarioModal> {
 
   @override
   Widget build(BuildContext context) {
-    types = Provider.of<Procedimentos>(context).procedimentos;
 
     return Container(
       padding: MediaQuery.of(context).viewInsets,
@@ -93,7 +130,11 @@ class _HorarioModalState extends State<HorarioModal> {
         mainAxisSize: MainAxisSize.min,
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Text(widget.details.appointments == null ? 'Agendamento de Horário' :'Editar Horário', textAlign: TextAlign.center, style: TextStyle(color: markPrimaryColor, fontSize: 18, fontWeight: FontWeight.bold),),
+          Text(
+            widget.details.appointments == null ? 'Agendamento de Horário' :'Editar Horário', 
+            textAlign: TextAlign.center, 
+            style: TextStyle(color: markPrimaryColor, fontSize: 18, fontWeight: FontWeight.bold),
+          ),
           SizedBox(height: 20,),
           InputTextAgendar(label: 'Nome', controller: _nameController),
           SizedBox(height: 10,),

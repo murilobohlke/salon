@@ -40,6 +40,18 @@ class HomePage extends StatelessWidget {
                   fontWeight: FontWeight.bold
                 ),
               ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(Icons.phone, color:Colors.red[700]),
+                  SizedBox(width: 10,),
+                  Text(
+                    '(53) 98418-3079',
+                    style: TextStyle(fontSize: 20, color: Colors.red[700], fontWeight: FontWeight.bold)
+                  ),
+                ],
+              ),
+              SizedBox(height: 10,),
               Text(
                 getSaudacaoText(nome: user?.name ?? '' ),
                 style: TextStyle(fontSize: 18, color: markPrimaryColor, fontWeight: FontWeight.bold),

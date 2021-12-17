@@ -4,7 +4,6 @@ import 'package:flutter/material.dart';
 
 import 'package:salon/database/db_firestore.dart';
 import 'package:salon/models/horario_model.dart';
-import 'package:salon/models/procedimento_model.dart';
 
 class Horarios with ChangeNotifier {
   late FirebaseFirestore db;
@@ -16,12 +15,20 @@ class Horarios with ChangeNotifier {
     return [..._historico].where((element) => element.userId == id).toList();
   }
 
+  int totalHorariosId(String id) {
+    return _historico.where((element) => element.userId == id).length + _horarios.where((element) => element.userId == id).length;
+  }
+
   List<HorarioModel> get horarios {
     return [..._horarios];
   }
 
   List<HorarioModel> get historico {
     return [..._historico];
+  }
+
+  int get total{
+    return horarios.length + historico.length;
   }
 
   Future<void> loadHorarios() async {
@@ -80,13 +87,15 @@ class Horarios with ChangeNotifier {
     await loadHorarios();
   }
 
-  Future<void> editHorario(String id, String name, ProcedimentoModel type) async{
+  Future<void> editHorario(HorarioModel h) async{
     db = DBFirestore.get();
 
-    await db.collection('horarios').doc(id).update({
-      'name': name,
-      'type': type.type,
-      'color': '0xff${type.color.value.toRadixString(16).substring(2, 8)}',
+    await db.collection('horarios').doc(h.id).update({
+      'name': h.name,
+      'start': h.start,
+      'end': h.end,
+      'type': h.type,
+      'color': '0xff${h.background.value.toRadixString(16).substring(2, 8)}',
     });
 
     await loadHorarios();

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
+import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:salon/_utils/app_config.dart';
 import 'package:salon/models/procedimento_model.dart';
@@ -27,6 +28,9 @@ class _ProcedimentoDetailsManagerPageState extends State<ProcedimentoDetailsMana
   TextEditingController? _priceController;
 
   Color? pickerColor;
+
+  late DateTime time;
+  final formatter = DateFormat('HH:mm');
 
   Future<void> _showDialogColors() async{
     showDialog(
@@ -58,13 +62,28 @@ class _ProcedimentoDetailsManagerPageState extends State<ProcedimentoDetailsMana
   }
 
   Future<void> _finish() async {
+
+    if(_procedimentoController.text ==''){
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Informe o procedimento', textAlign: TextAlign.center), backgroundColor: Colors.red[700],));
+
+      return;
+    }
+
+    if(pickerColor == null){
+      ScaffoldMessenger.of(context).hideCurrentSnackBar();
+      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Selecione a cor', textAlign: TextAlign.center), backgroundColor: Colors.red[700],));
+
+      return;
+    }  
+
     setState(()=> isLoading = true);
     
     if(widget.procedimento == null){
-      ProcedimentoModel p = ProcedimentoModel('', _procedimentoController.text, _priceController!.text, pickerColor!);
+      ProcedimentoModel p = ProcedimentoModel('', _procedimentoController.text, _priceController!.text, pickerColor!, time);
       await Provider.of<Procedimentos>(context, listen: false).addProcedimento(p);
     } else{ 
-      ProcedimentoModel p = ProcedimentoModel(widget.procedimento!.id, _procedimentoController.text, _priceController!.text, pickerColor!);
+      ProcedimentoModel p = ProcedimentoModel(widget.procedimento!.id, _procedimentoController.text, _priceController!.text, pickerColor!, time);
       await Provider.of<Procedimentos>(context, listen: false).editProcedimento(p);
     }
 
@@ -89,7 +108,9 @@ class _ProcedimentoDetailsManagerPageState extends State<ProcedimentoDetailsMana
     _procedimentoController.text = widget.procedimento == null ? '' : widget.procedimento!.type;
     _priceController = MoneyMaskedTextController(initialValue: widget.procedimento == null ? 0 : double.parse(widget.procedimento!.price.replaceAll(',', '.')));
     pickerColor = widget.procedimento == null ? null : widget.procedimento!.color;
+    time = widget.procedimento == null ? DateTime(2021, 1, 1, 0, 30) : widget.procedimento!.time;
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -126,11 +147,41 @@ class _ProcedimentoDetailsManagerPageState extends State<ProcedimentoDetailsMana
                 decoration: BoxDecoration(
                   border: Border.all(color: markPrimaryColor, width: 2),
                   borderRadius: BorderRadius.circular(25),
-                  color: pickerColor == null ? Colors.white : pickerColor
+                  color: pickerColor == null ? Theme.of(context).scaffoldBackgroundColor : pickerColor
                 ),
                 child: Center(child: Text(pickerColor == null ? 'Selecione uma cor' : '', style: TextStyle(fontSize: 16),)),
               ),
             ),
+            SizedBox(height: 20,),
+            Container(
+                width: double.infinity,
+                height: 45,
+                decoration: BoxDecoration(
+                  border: Border.all(color: markPrimaryColor, width: 2),
+                  borderRadius: BorderRadius.circular(25),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    IconButton(
+                      onPressed: (){
+                        setState(() => time = time.subtract(Duration(minutes: 15)));
+                      }, 
+                      icon: Icon(Icons.remove, color: markPrimaryColor)
+                    ),
+                    Text(
+                      '${formatter.format(time)} h',
+                      style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                    ),
+                    IconButton(
+                      onPressed: (){
+                        setState(() => time = time.add(Duration(minutes: 15)));
+                      }, 
+                      icon: Icon(Icons.add, color: markPrimaryColor)
+                    ),
+                  ],
+                ),
+              ),
             Spacer(),
             Row(
               children: [
